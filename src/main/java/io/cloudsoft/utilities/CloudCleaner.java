@@ -1,7 +1,9 @@
 package io.cloudsoft.utilities;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -9,6 +11,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import com.google.inject.Module;
 import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
 import org.jclouds.ContextBuilder;
@@ -38,7 +42,9 @@ import org.jclouds.softlayer.domain.VirtualGuest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +73,10 @@ public class CloudCleaner {
     */
    private static final String RACKSPACE_UK_PROVIDER = "rackspace-cloudservers-uk";
    /**
+    * Rackspace Cloud Servers US.
+    */
+   private static final String RACKSPACE_US_PROVIDER = "rackspace-cloudservers-us";
+   /**
     * Softlayer
     */
    private static final String SOFTLAYER_PROVIDER = "softlayer";
@@ -74,9 +84,18 @@ public class CloudCleaner {
     * Hp Cloud Compute.
     */
    private static final String HPCLOUD_PROVIDER = "hpcloud-compute";
+   /**
+    * Google Cloud Compute
+    */
+   private static final String GOOGLE_COMPUTE_ENGINE_PROVIDER = "google-compute-engine";
+   /**
+    * IBM Smart Cloud Enterprise.
+    */
+   private static final String IBM_SCE_PROVIDER = "ibm-sce-compute";
 
-   private static final List<String> SUPPORTED_PROVIDERS = ImmutableList.of(SOFTLAYER_PROVIDER, AWS_PROVIDER,
-           RACKSPACE_UK_PROVIDER, HPCLOUD_PROVIDER);
+   private static final List<String> SUPPORTED_PROVIDERS =
+           ImmutableList.of(GOOGLE_COMPUTE_ENGINE_PROVIDER, SOFTLAYER_PROVIDER, AWS_PROVIDER, RACKSPACE_UK_PROVIDER,
+                   HPCLOUD_PROVIDER);
    /**
     * System property for access key.
     */
@@ -145,12 +164,34 @@ public class CloudCleaner {
                List<Instance> softlayerInstances = listSoftlayerInstances();
                instances.addAll(softlayerInstances);
                printInstances(provider, softlayerInstances);
+            } else if (provider.equals(GOOGLE_COMPUTE_ENGINE_PROVIDER)) {
+               List<Instance> googleComputeInstances = listGoogleComputeEngineInstances();
+               instances.addAll(googleComputeInstances);
+               printInstances(provider, googleComputeInstances);
             } else {
                throw new RuntimeException("Not supported api/provider: " + provider);
             }
          } finally {
             computeServiceContext.close();
          }
+      }
+      return instances;
+   }
+
+   private List<Instance> listGoogleComputeEngineInstances() {
+      List<Instance> instances = Lists.newArrayList();
+      for(NodeMetadata nodeMetadata : computeServiceContext.getComputeService().listNodesDetailsMatching(Predicates
+              .<ComputeMetadata>notNull())) {
+         instances.add(Instance.builder()
+                 .id(nodeMetadata.getId())
+                 .provider(GOOGLE_COMPUTE_ENGINE_PROVIDER)
+                 .region(nodeMetadata.getLocation().getDescription())
+                 .type(nodeMetadata.getType().name())
+                 .status(nodeMetadata.getStatus().name())
+                         //.keyName(nodeMetadata.getType())
+                         //.uptime(new Date().getTime() - computeServiceContext.getComputeService().getTime())
+                         //.tags(nodeMetadata.getTags())
+                 .build());
       }
       return instances;
    }
@@ -171,7 +212,6 @@ public class CloudCleaner {
                  //.tags()
                  .build());
       }
-
       return instances;
    }
 
@@ -371,7 +411,7 @@ public class CloudCleaner {
       }
    }
 
-   private static Map<String, List<String>> getCredentials(Optional<String> provider) {
+   private static Map<String, List<String>> getCredentials(Optional<String> provider) throws IOException {
       Map<String, List<String>> credentials = Maps.newLinkedHashMap();
 
       if (!provider.isPresent()) {
@@ -385,11 +425,11 @@ public class CloudCleaner {
       return credentials;
    }
 
-   private static void putProviderAndItsCredentials(Map<String, List<String>> credentials, String provider) {
+   private static void putProviderAndItsCredentials(Map<String, List<String>> credentials, String provider) throws IOException {
       credentials.put(provider, ImmutableList.of(
               checkNotNull(System.getProperty(provider + "." + IDENTITY_PROPERTY), IDENTITY_PROPERTY),
-              checkNotNull(System.getProperty(provider + "." + CREDENTIAL_PROPERTY), CREDENTIAL_PROPERTY)
-      ));
+              checkNotNull(System.getProperty(provider + "." + CREDENTIAL_PROPERTY), CREDENTIAL_PROPERTY))
+      );
    }
 
 }

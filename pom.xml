@@ -14,7 +14,19 @@
         <jclouds.version>1.6.0</jclouds.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>cloudsoft-maven-releases</id>
+            <url>http://developers.cloudsoftcorp.com/maven/releases</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>org.jclouds.labs</groupId>
+            <artifactId>google-compute-engine</artifactId>
+            <version>1.6.0-cloudsoft.1</version>
+        </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-compute</artifactId>
