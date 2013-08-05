@@ -16,13 +16,14 @@ public class TagPredicates {
       return new IsInstance();
    }
 
-   public static Predicate getResource(String instanceId) {
+   public static Predicate hasId(String instanceId) {
       return new GetResource(instanceId);
    }
 
    public static Predicate containsStatus() {
       return new ContainsStatus();
    }
+
 }
 
 class IsInstance implements Predicate<Tag> {
