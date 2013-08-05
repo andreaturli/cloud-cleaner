@@ -22,8 +22,7 @@ This will create an executable Jar file named `cloudcleaner-0.1.0-SNAPSHOT-jar-w
 
 Use the program as follows, 
 
-    % java -jar target/cloud-cleaner-jar-with-dependencies.jar LIST 
-    		-Daws-ec2.identity=XXXXXXXX 
+    % java -Daws-ec2.identity=XXXXXXXX 
     		-Daws-ec2.credential=XXXXXXXX 
             -Drackspace-cloudservers-uk.identity=XXXXXXXX 
             -Drackspace cloudservers-uk.credential=XXXXXXXX
@@ -31,12 +30,14 @@ Use the program as follows,
             -Dhpcloud-compute.credential=XXXXXXXX
             -Dsoftlayer.identity=XXXXXXXX 
             -Dsoftlayer.credential=XXXXXXXX                        
+            -jar target/cloud-cleaner-jar-with-dependencies.jar LIST 
 
 or, for example,
 
-     % java -jar target/cloud-cleaner-jar-with-dependencies.jar LIST aws-ec2     
-     			-Daws-ec2.identity=XXXXXXXX 
-     			-Daws-ec2.credential=XXXXXXXX
+     % java -Daws-ec2.identity=XXXXXXXX 
+     	    -Daws-ec2.credential=XXXXXXXX
+     		-jar target/cloud-cleaner-jar-with-dependencies.jar LIST aws-ec2     
+     			
 
 if you want to list only the instances on AWS EC2.
 
