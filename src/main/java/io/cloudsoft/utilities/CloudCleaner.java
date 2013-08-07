@@ -1,6 +1,5 @@
 package io.cloudsoft.utilities;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -11,8 +10,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
+import com.google.common.collect.Sets;
 import com.google.inject.Module;
 import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
 import org.jclouds.ContextBuilder;
@@ -42,9 +40,7 @@ import org.jclouds.softlayer.domain.VirtualGuest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -94,8 +90,8 @@ public class CloudCleaner {
    private static final String IBM_SCE_PROVIDER = "ibm-sce-compute";
 
    private static final List<String> SUPPORTED_PROVIDERS =
-           ImmutableList.of(GOOGLE_COMPUTE_ENGINE_PROVIDER, SOFTLAYER_PROVIDER, AWS_PROVIDER, RACKSPACE_UK_PROVIDER,
-                   HPCLOUD_PROVIDER);
+           ImmutableList.of(GOOGLE_COMPUTE_ENGINE_PROVIDER, SOFTLAYER_PROVIDER, AWS_PROVIDER,
+                   HPCLOUD_PROVIDER, RACKSPACE_UK_PROVIDER);
    /**
     * System property for access key.
     */
@@ -124,13 +120,13 @@ public class CloudCleaner {
       this.credentials = credentials;
    }
 
-   private void listInstances(Optional<String> provider) throws Exception {
-      if (!provider.isPresent()) {
+   private void listInstances(Optional<List<String>> optionalProviders) throws Exception {
+      if (!optionalProviders.isPresent()) {
          LOG.info("List all nodes and their tags");
          retrieveAndPrintInstances(SUPPORTED_PROVIDERS);
       } else {
-         LOG.info("List nodes from provider: {} and its tags", provider.get());
-         retrieveAndPrintInstances(ImmutableList.of(provider.get()));
+         LOG.info("List nodes of provider(s): {} with tags", optionalProviders.get());
+         retrieveAndPrintInstances(optionalProviders.get());
       }
    }
 
@@ -391,45 +387,51 @@ public class CloudCleaner {
       if (argv.length < 1) {
          System.exit(1);
       }
-      Optional<String> provider = Optional.absent();
-      if(argv.length == 2) {
-         provider =  Optional.of(argv[1]);
-         if(!SUPPORTED_PROVIDERS.contains(provider.get())) {
-            LOG.error("Provider {} is not supported.", provider.get());
-            System.exit(1);
+      Optional<List<String>> optionalProviders = Optional.absent();
+      if(argv.length > 1) {
+         List<String> providers = Lists.newArrayList(argv);
+         providers.remove(0);
+         optionalProviders =  Optional.of(providers);
+
+         for(String provider : optionalProviders.get()) {
+            if(!SUPPORTED_PROVIDERS.contains(provider)) {
+               LOG.error("Provider {} is not supported.", provider);
+               System.exit(1);
+            }
          }
+
       }
       String action = argv[0];
 
       // Initialise and then execute the cleanUp method
-      CloudCleaner cleaner = new CloudCleaner(getCredentials(provider));
+      CloudCleaner cleaner = new CloudCleaner(getCredentials(optionalProviders));
       if (action.equalsIgnoreCase(ACTION.LIST.toString())) {
-         cleaner.listInstances(provider);
+         cleaner.listInstances(optionalProviders);
       } else if (action.equalsIgnoreCase(ACTION.TAG_AND_CLEANUP.toString())) {
          LOG.info("Tag all nodes and cleanUp, if needed");
          cleaner.tagAndCleanUp();
       }
    }
 
-   private static Map<String, List<String>> getCredentials(Optional<String> provider) throws IOException {
+   private static Map<String, List<String>> getCredentials(Optional<List<String>> providers) throws IOException {
       Map<String, List<String>> credentials = Maps.newLinkedHashMap();
 
-      if (!provider.isPresent()) {
-         for(String supportedProvider : SUPPORTED_PROVIDERS) {
-            putProviderAndItsCredentials(credentials, supportedProvider);
-         }
+      if (!providers.isPresent()) {
+            putProviderAndItsCredentials(credentials, SUPPORTED_PROVIDERS);
       } else {
-         LOG.info("Adding credentials to provider: {}", provider.get());
-         putProviderAndItsCredentials(credentials, provider.get());
+         putProviderAndItsCredentials(credentials, providers.get());
       }
       return credentials;
    }
 
-   private static void putProviderAndItsCredentials(Map<String, List<String>> credentials, String provider) throws IOException {
-      credentials.put(provider, ImmutableList.of(
-              checkNotNull(System.getProperty(provider + "." + IDENTITY_PROPERTY), IDENTITY_PROPERTY),
-              checkNotNull(System.getProperty(provider + "." + CREDENTIAL_PROPERTY), CREDENTIAL_PROPERTY))
-      );
+   private static void putProviderAndItsCredentials(Map<String, List<String>> credentials,
+                                                    List<String> providers) throws IOException {
+      for(String provider : providers) {
+         String identity = checkNotNull(System.getProperty(provider + "." + IDENTITY_PROPERTY), IDENTITY_PROPERTY + " for " + provider);
+         String credential = checkNotNull(System.getProperty(provider + "." + CREDENTIAL_PROPERTY), CREDENTIAL_PROPERTY + " for " + provider);
+         LOG.info("provider({}) - identity({}), credential({})", provider, identity, credential);
+         credentials.put(provider, ImmutableList.of(identity, credential));
+      }
    }
 
 }
