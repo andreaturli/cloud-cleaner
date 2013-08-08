@@ -458,7 +458,12 @@ public class CloudCleaner {
       for(String provider : providers) {
          String identity = checkNotNull(System.getProperty(provider + "." + IDENTITY_PROPERTY), IDENTITY_PROPERTY + " for " + provider);
          String credential = checkNotNull(System.getProperty(provider + "." + CREDENTIAL_PROPERTY), CREDENTIAL_PROPERTY + " for " + provider);
-         LOG.info("Found credentials for provider({})", provider);
+         if (Boolean.getBoolean("showCredentialsInLog")) {
+            LOG.info("provider({}) - identity({}), credential({})", provider, identity, credential);
+         }
+         else{
+            LOG.info("Found credentials for provider({}) - identity({})", provider, identity);
+         }
          credentials.put(provider, ImmutableList.of(identity, credential));
       }
    }
