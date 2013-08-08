@@ -461,6 +461,9 @@ public class CloudCleaner {
          if (Boolean.getBoolean("showCredentialsInLog")) {
             LOG.info("provider({}) - identity({}), credential({})", provider, identity, credential);
          }
+         else{
+            LOG.info("Found credentials for provider({}) - identity({})", provider, identity);
+         }
          credentials.put(provider, ImmutableList.of(identity, credential));
       }
    }
