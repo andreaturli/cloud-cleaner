@@ -4,7 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.cloudsoft.utilities.TagPredicates;
+import io.cloudsoft.utilities.predicates.TagPredicates;
 import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
 import org.jclouds.aws.ec2.AWSEC2Client;
 import org.jclouds.aws.ec2.services.AWSInstanceClient;

@@ -1,4 +1,4 @@
-package io.cloudsoft.utilities;
+package io.cloudsoft.utilities.predicates;
 
 import com.google.common.base.Predicate;
 import org.jclouds.ec2.domain.Tag;
