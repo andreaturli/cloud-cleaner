@@ -7,19 +7,22 @@ import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.cloudsoft.utilities.cli.CloudCleaner.AWS_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.GOOGLE_COMPUTE_ENGINE_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.HPCLOUD_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.IBM_SCE_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.INTEROUTE_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.RACKSPACE_UK_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.RACKSPACE_US_PROVIDER;
-import static io.cloudsoft.utilities.cli.CloudCleaner.SOFTLAYER_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.AWS_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.GOOGLE_COMPUTE_ENGINE_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.HPCLOUD_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.IBM_SCE_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.INTEROUTE_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.RACKSPACE_UK_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.RACKSPACE_US_PROVIDER;
+import static io.cloudsoft.utilities.providers.Provider.SOFTLAYER_PROVIDER;
 
 public class ProviderFactory {
 
-    public Provider createProvider(String provider) {
+    public Provider createProvider(String provider) throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
         if (provider.equals(AWS_PROVIDER)) {
             return new Ec2(AWS_PROVIDER, getIdentity(AWS_PROVIDER), getCredential(AWS_PROVIDER));
         } else if (provider.equals(RACKSPACE_UK_PROVIDER)) {
@@ -35,10 +38,10 @@ public class ProviderFactory {
         } else if (provider.equals(GOOGLE_COMPUTE_ENGINE_PROVIDER)) {
             return new GoogleComputeEngine(getIdentity(GOOGLE_COMPUTE_ENGINE_PROVIDER),
                     getCredential(GOOGLE_COMPUTE_ENGINE_PROVIDER));
-        } else if (provider.equals(IBM_SCE_PROVIDER)) {
-            return new IbmSmartCloudEnterprise(getIdentity(IBM_SCE_PROVIDER), getCredential(IBM_SCE_PROVIDER));
         } else if (provider.equals(INTEROUTE_PROVIDER)) {
             return new Interoute(getIdentity(INTEROUTE_PROVIDER), getCredential(INTEROUTE_PROVIDER));
+        } else if (provider.equals(IBM_SCE_PROVIDER)) {
+            return new IbmSmartCloudEnterprise(getIdentity(IBM_SCE_PROVIDER), getCredential(IBM_SCE_PROVIDER));
         } else {
             throw new RuntimeException("Not supported api/provider: " + provider);
         }

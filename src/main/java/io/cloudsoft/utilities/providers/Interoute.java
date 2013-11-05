@@ -64,7 +64,7 @@ class Interoute extends Provider {
                     .listVirtualAppliances()) {
                 if (virtualAppliance.getName().startsWith(prefix) && virtualAppliance.getState() ==
                         VirtualApplianceState.NOT_DEPLOYED) {
-                    instances.add(Instance.builder().id(virtualAppliance.getId().toString()).provider(provider)
+                    instances.add(Instance.builder().id(virtualAppliance.getId().toString()).provider(name)
                             .region(virtualAppliance.getVirtualDatacenter().getName())
                             .status(virtualAppliance.getState().name())
                             .build());

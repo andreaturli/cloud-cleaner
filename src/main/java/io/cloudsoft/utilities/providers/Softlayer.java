@@ -12,8 +12,6 @@ import org.jclouds.softlayer.domain.VirtualGuest;
 import java.util.Date;
 import java.util.List;
 
-import static io.cloudsoft.utilities.cli.CloudCleaner.SOFTLAYER_PROVIDER;
-
 public class Softlayer extends Provider {
 
     protected Softlayer(String identity, String credential) {
@@ -23,12 +21,12 @@ public class Softlayer extends Provider {
     @Override
     public List<Instance> listInstances() throws Exception {
         List<Instance> instances = Lists.newArrayList();
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(provider);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
         try {
             RestContext<SoftLayerClient, SoftLayerAsyncClient> client = computeServiceContext.unwrap();
             SoftLayerClient api = client.getApi();
             for (VirtualGuest virtualGuest : api.getVirtualGuestClient().listVirtualGuests()) {
-                instances.add(Instance.builder().id(virtualGuest.getUuid()).provider(provider)
+                instances.add(Instance.builder().id(virtualGuest.getUuid()).provider(name)
                         .region(virtualGuest.getDatacenter().getLongName()).type("Cloud Compute Instance")
                         .status(virtualGuest.getPowerState().toString()).keyName(virtualGuest.getAccountId() + "")
                         .uptime(new Date().getTime() - virtualGuest.getCreateDate().getTime())
@@ -42,9 +40,4 @@ public class Softlayer extends Provider {
         }
         return instances;    }
 
-    @Override
-    public List<Instance> destroyInstances(String prefix) {
-        System.out.println("No-op");
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 }

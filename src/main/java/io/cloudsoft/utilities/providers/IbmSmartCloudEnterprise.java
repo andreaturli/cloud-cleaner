@@ -9,8 +9,6 @@ import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
 import java.util.Date;
 import java.util.List;
 
-import static io.cloudsoft.utilities.cli.CloudCleaner.IBM_SCE_PROVIDER;
-
 public class IbmSmartCloudEnterprise extends Provider {
 
     public IbmSmartCloudEnterprise(String identity, String credential) {
@@ -24,7 +22,7 @@ public class IbmSmartCloudEnterprise extends Provider {
         client.setRemoteCredentials(identity, credential);
         try {
             for (com.ibm.cloud.api.rest.client.bean.Instance instance : client.describeInstances()) {
-                instances.add(Instance.builder().id(instance.getID()).provider(provider)
+                instances.add(Instance.builder().id(instance.getID()).provider(name)
                         .region(instance.getLocation()).type(instance.getInstanceType())
                         .status(instance.getStatus().toString())
                         .keyName(instance.getKeyName())
@@ -37,9 +35,4 @@ public class IbmSmartCloudEnterprise extends Provider {
         }
         return instances;    }
 
-    @Override
-    public List<Instance> destroyInstances(String prefix) {
-        System.out.println("No-op");
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 }
