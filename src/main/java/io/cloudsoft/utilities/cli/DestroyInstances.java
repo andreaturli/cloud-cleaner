@@ -41,7 +41,7 @@ public class DestroyInstances extends CloudCleanerCommand {
         List<String> providers = optionalProviders.isPresent() ? optionalProviders.get() :  SUPPORTED_PROVIDERS;
         log.info("Destroy all instances of provider(s): {} matching prefix: {}", providers, prefix);
         for (String provider : providers) {
-            destroyedInstances = new ProviderFactory(getCredentials()).createProvider(provider)
+            destroyedInstances = new ProviderFactory().createProvider(provider)
                     .destroyInstances(prefix);
         }
         return destroyedInstances;

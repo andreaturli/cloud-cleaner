@@ -58,10 +58,8 @@ class Interoute extends Provider {
                 .endpoint("http://vdcbridge.interoute.com/jclouds/api/")
                 .credentials(identity, credential).buildView(AbiquoContext.class);
         try {
-
-            computeServiceContext.getComputeService().destroyNodesMatching(Predicates
-                    .<NodeMetadata>and(not(TERMINATED), groupStartsWith(prefix)));
-
+            computeServiceContext.getComputeService()
+                    .destroyNodesMatching(Predicates.<NodeMetadata>and(not(TERMINATED), groupStartsWith(prefix)));
             for (VirtualAppliance virtualAppliance : ((AbiquoContext) computeServiceContext).getCloudService()
                     .listVirtualAppliances()) {
                 if (virtualAppliance.getName().startsWith(prefix) && virtualAppliance.getState() ==

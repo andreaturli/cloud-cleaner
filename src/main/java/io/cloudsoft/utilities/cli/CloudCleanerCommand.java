@@ -1,5 +1,6 @@
 package io.cloudsoft.utilities.cli;
 
+import brooklyn.config.BrooklynProperties;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import io.airlift.command.Option;
@@ -33,30 +34,12 @@ public class CloudCleanerCommand implements Runnable {
     @Option(name = "-s", description = "show credentials in log")
     public boolean showCredentialsInLog;
 
-    private final Map<String, List<String>> providerAndCredentials;
-
     public CloudCleanerCommand() {
-        providerAndCredentials = initCredentials();
         this.verbose = false;
     }
 
     public void run() {
         System.out.println(getClass().getSimpleName());
-    }
-
-    private Map<String, List<String>> initCredentials() {
-        Map<String, List<String>> credentials = Maps.newHashMap();
-        for (String provider : SUPPORTED_PROVIDERS) {
-            String identity = checkNotNull(System.getProperty(provider + "." + IDENTITY_PROPERTY), IDENTITY_PROPERTY + " for " + provider);
-            String credential = checkNotNull(System.getProperty(provider + "." + CREDENTIAL_PROPERTY), CREDENTIAL_PROPERTY + " for " + provider);
-            if (showCredentialsInLog) {
-                log.info("provider({}) - identity({}), credential({})", provider, identity, credential);
-            } else {
-                log.info("Found credentials for provider({}) - identity({})", provider, identity);
-            }
-            credentials.put(provider, ImmutableList.of(identity, credential));
-        }
-        return credentials;
     }
 
     public void printInstances(String provider, List<Instance> instances) {
@@ -68,8 +51,4 @@ public class CloudCleanerCommand implements Runnable {
         }
     }
 
-    public Map<String, List<String>> getCredentials() {
-        return providerAndCredentials;
-    }
 }
-

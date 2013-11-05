@@ -34,7 +34,7 @@ public class ListInstances extends CloudCleanerCommand {
         List<String> providers = optionalProviders.isPresent() ? optionalProviders.get() :  SUPPORTED_PROVIDERS;
         log.info("List all instances of provider(s): {} and their tags", providers);
         for (String provider : providers) {
-                printInstances(provider, new ProviderFactory(getCredentials()).createProvider(provider)
+                printInstances(provider, new ProviderFactory().createProvider(provider)
                         .listInstances());
         }
     }

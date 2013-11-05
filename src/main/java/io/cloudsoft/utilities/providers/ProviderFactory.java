@@ -1,8 +1,13 @@
 package io.cloudsoft.utilities.providers;
 
-import java.util.List;
-import java.util.Map;
+import brooklyn.config.BrooklynProperties;
+import brooklyn.config.ConfigKey;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.cloudsoft.utilities.cli.CloudCleaner.AWS_PROVIDER;
 import static io.cloudsoft.utilities.cli.CloudCleaner.GOOGLE_COMPUTE_ENGINE_PROVIDER;
 import static io.cloudsoft.utilities.cli.CloudCleaner.HPCLOUD_PROVIDER;
@@ -13,12 +18,6 @@ import static io.cloudsoft.utilities.cli.CloudCleaner.RACKSPACE_US_PROVIDER;
 import static io.cloudsoft.utilities.cli.CloudCleaner.SOFTLAYER_PROVIDER;
 
 public class ProviderFactory {
-
-    protected Map<String, List<String>> credentials;
-
-    public ProviderFactory(Map<String, List<String>> credentials) {
-        this.credentials = credentials;
-    }
 
     public Provider createProvider(String provider) {
         if (provider.equals(AWS_PROVIDER)) {
@@ -45,17 +44,23 @@ public class ProviderFactory {
         }
     }
 
-    private String getIdentity(String provider) {
-        if(!credentials.containsKey(provider)) {
-            throw new IllegalStateException("Cannot find identity for " + provider);
-        }
-        return credentials.get(provider).get(0);
+    private String getIdentity(final String provider) {
+        return getValue(provider, "identity");
     }
 
     private String getCredential(String provider) {
-        if(!credentials.containsKey(provider)) {
-            throw new IllegalStateException("Cannot find credential for " + provider);
-        }
-        return credentials.get(provider).get(1);
+        return getValue(provider, "credential");
+    }
+
+    private String getValue(final String provider, final String end) {
+        final BrooklynProperties brooklynProperties = BrooklynProperties.Factory.newDefault();
+        ConfigKey key = checkNotNull(Iterables.getFirst(Iterables.filter(brooklynProperties.getAllConfig().keySet(),
+                new Predicate<ConfigKey>() {
+                    @Override
+                    public boolean apply(@Nullable ConfigKey input) {
+                        return input.getName().contains(provider) && input.getName().endsWith(end);
+                    }
+                }), null));
+        return brooklynProperties.getConfig(key).toString();
     }
 }

@@ -86,18 +86,6 @@ public class Instance {
               equal(this.uptime, that.uptime);
    }
 
-   @Override
-   public String toString() {
-      return string().toString();
-   }
-
-   protected Objects.ToStringHelper string() {
-      return toStringHelper(this).add("id", id).add("provider", provider)
-              .add("region", region).add("status", status).add("uptime (in hours)",
-                      TimeUnit.MILLISECONDS.toHours(uptime))
-              .add("tags", tags).add("type", type).add("keyName", keyName);
-   }
-
    public static Builder builder() {
       return new Builder();
    }
@@ -168,7 +156,7 @@ public class Instance {
       }
 
       public Builder fromInstance(Instance in) {
-         return  id(in.getId())
+         return id(in.getId())
                  .provider(in.getProvider())
                  .region(in.getRegion())
                  .type(in.getType())
@@ -177,5 +165,19 @@ public class Instance {
                  .uptime(in.getUptime())
                  .tags(in.getTags());
       }
+
+       @Override
+       public String toString() {
+           return Objects.toStringHelper(this)
+                   .add("id", id)
+                   .add("provider", provider)
+                   .add("region", region)
+                   .add("type", type)
+                   .add("status", status)
+                   .add("keyName", keyName)
+                   .add("uptime", uptime)
+                   .add("tags", tags)
+                   .toString();
+       }
    }
 }

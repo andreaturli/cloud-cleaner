@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jclouds.version>1.6.1-incubating</jclouds.version>
+        <brooklyn.version>0.6.0-SNAPSHOT</brooklyn.version>
     </properties>
 
     <repositories>
@@ -27,7 +27,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jclouds.labs</groupId>
+            <groupId>io.brooklyn</groupId>
+            <artifactId>brooklyn-all</artifactId>
+            <version>${brooklyn.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.apache.jclouds.labs</groupId>
             <artifactId>google-compute-engine</artifactId>
             <version>1.6.1-cloudsoft.1</version>
         </dependency>
@@ -72,7 +78,8 @@
             <artifactId>commons-cli</artifactId>
             <version>20040117.000000</version>
         </dependency>
-                <dependency>
+        -->
+        <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
@@ -121,7 +128,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>io.cloudsoft.utilities.CloudCleaner</mainClass>
+                            <mainClass>io.cloudsoft.utilities.cli.CloudCleaner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -135,7 +142,7 @@
                     </descriptors>
                     <archive>
                         <manifest>
-                            <mainClass>io.cloudsoft.utilities.CloudCleaner</mainClass>
+                            <mainClass>io.cloudsoft.utilities.cli.CloudCleaner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
