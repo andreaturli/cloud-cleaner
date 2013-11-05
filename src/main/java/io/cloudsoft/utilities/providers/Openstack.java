@@ -32,7 +32,7 @@ class Openstack extends Provider {
     @Override
     public List<Instance> listInstances() throws Exception {
         List<Instance> instances = Lists.newArrayList();
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(provider);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
         try {
             RestContext<NovaApi, NovaAsyncApi> client = computeServiceContext.unwrap();
             for (String zone : client.getApi().getConfiguredZones()) {
@@ -41,7 +41,7 @@ class Openstack extends Provider {
 
                 for (Server server : servers) {
                     serverApiForZone.getMetadata(server.getId());
-                    instances.add(Instance.builder().id(server.getId()).provider(provider).region(zone)
+                    instances.add(Instance.builder().id(server.getId()).provider(name).region(zone)
                             .type(server.getFlavor().getId()).status(server.getStatus().toString())
                             .keyName(server.getKeyName()).uptime(new Date().getTime() - server.getCreated().getTime())
                             .tags(serverApiForZone.getMetadata(server.getId())).build());
@@ -58,7 +58,7 @@ class Openstack extends Provider {
     @Override
     public void tagAndCleanInstances(String tag) throws Exception {
         super.tagAndCleanInstances(tag);
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(provider);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
         RestContext<NovaApi, NovaAsyncApi> client = computeServiceContext.unwrap();
         for (String zone : client.getApi().getConfiguredZones()) {
             ServerApi serverApiForZone = client.getApi().getServerApiForZone(zone);

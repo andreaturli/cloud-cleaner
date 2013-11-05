@@ -10,6 +10,7 @@ import io.cloudsoft.utilities.providers.ProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 @Command(name = "destroy", description = "Destroy all instances in the clouds matching a given prefix")

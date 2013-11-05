@@ -22,7 +22,7 @@ import static io.cloudsoft.utilities.providers.Provider.SOFTLAYER_PROVIDER;
 
 public class ProviderFactory {
 
-    public Provider createProvider(String provider) throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+    public Provider createProvider(String provider) {
         if (provider.equals(AWS_PROVIDER)) {
             return new Ec2(AWS_PROVIDER, getIdentity(AWS_PROVIDER), getCredential(AWS_PROVIDER));
         } else if (provider.equals(RACKSPACE_UK_PROVIDER)) {
