@@ -24,15 +24,15 @@ public class ProviderFactory {
 
     public Provider createProvider(String provider) {
         if (provider.equals(AWS_PROVIDER)) {
-            return new Ec2(AWS_PROVIDER, getIdentity(AWS_PROVIDER), getCredential(AWS_PROVIDER));
+            return new Ec2(getIdentity(AWS_PROVIDER), getCredential(AWS_PROVIDER));
         } else if (provider.equals(RACKSPACE_UK_PROVIDER)) {
-            return new Openstack(RACKSPACE_UK_PROVIDER, getIdentity(RACKSPACE_UK_PROVIDER),
+            return new RackspaceCloudserversUK(getIdentity(RACKSPACE_UK_PROVIDER),
                     getCredential(RACKSPACE_UK_PROVIDER));
         } else if (provider.equals(RACKSPACE_US_PROVIDER)) {
-            return new Openstack(RACKSPACE_US_PROVIDER, getIdentity(RACKSPACE_US_PROVIDER),
+            return new RackspaceCloudserversUS(getIdentity(RACKSPACE_US_PROVIDER),
                     getCredential(RACKSPACE_US_PROVIDER));
         } else if (provider.equals(HPCLOUD_PROVIDER)) {
-            return new Openstack(HPCLOUD_PROVIDER, getIdentity(HPCLOUD_PROVIDER), getCredential(HPCLOUD_PROVIDER));
+            return new HpCloudCompute(getIdentity(HPCLOUD_PROVIDER), getCredential(HPCLOUD_PROVIDER));
         } else if (provider.equals(SOFTLAYER_PROVIDER)) {
             return new Softlayer(getIdentity(SOFTLAYER_PROVIDER), getCredential(SOFTLAYER_PROVIDER));
         } else if (provider.equals(GOOGLE_COMPUTE_ENGINE_PROVIDER)) {
@@ -63,7 +63,7 @@ public class ProviderFactory {
                     public boolean apply(@Nullable ConfigKey input) {
                         return input.getName().contains(provider) && input.getName().endsWith(end);
                     }
-                }), null));
+                }), null), "There isn't a configKey for provider: " + provider);
         return brooklynProperties.getConfig(key).toString();
     }
 }

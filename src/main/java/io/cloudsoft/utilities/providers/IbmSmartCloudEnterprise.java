@@ -5,14 +5,23 @@ import com.google.common.collect.Lists;
 import com.ibm.cloud.api.rest.client.DeveloperCloud;
 import com.ibm.cloud.api.rest.client.DeveloperCloudClient;
 import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
 
-public class IbmSmartCloudEnterprise extends Provider {
+public class IbmSmartCloudEnterprise extends BasicProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(IbmSmartCloudEnterprise.class);
 
     public IbmSmartCloudEnterprise(String identity, String credential) {
-        super(IBM_SCE_PROVIDER, identity, credential);
+        super(identity, credential);
+    }
+
+    @Override
+    public String getName() {
+        return IBM_SCE_PROVIDER;
     }
 
     @Override
@@ -22,7 +31,7 @@ public class IbmSmartCloudEnterprise extends Provider {
         client.setRemoteCredentials(identity, credential);
         try {
             for (com.ibm.cloud.api.rest.client.bean.Instance instance : client.describeInstances()) {
-                instances.add(Instance.builder().id(instance.getID()).provider(name)
+                instances.add(Instance.builder().id(instance.getID()).provider(getName())
                         .region(instance.getLocation()).type(instance.getInstanceType())
                         .status(instance.getStatus().toString())
                         .keyName(instance.getKeyName())
@@ -33,6 +42,8 @@ public class IbmSmartCloudEnterprise extends Provider {
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
-        return instances;    }
+        return instances;
+    }
 
 }
+

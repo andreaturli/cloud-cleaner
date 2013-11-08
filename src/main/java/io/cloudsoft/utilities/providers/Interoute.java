@@ -12,6 +12,8 @@ import org.jclouds.abiquo.domain.cloud.VirtualAppliance;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -20,10 +22,17 @@ import static com.google.common.base.Predicates.not;
 import static com.google.common.base.Strings.emptyToNull;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 
-class Interoute extends Provider {
+class Interoute extends BasicProvider {
 
-    protected Interoute(String identity, String credential) {
-        super("abiquo", identity, credential);
+    private static final Logger log = LoggerFactory.getLogger(Interoute.class);
+
+    public Interoute(String identity, String credential) {
+        super(identity, credential);
+    }
+
+    @Override
+    public String getName() {
+        return INTEROUTE_PROVIDER;
     }
 
     @Override
@@ -38,7 +47,7 @@ class Interoute extends Provider {
                 instances.add(Instance.builder().id(nodeMetadata.getId()).provider("abiquo")
                         .region(nodeMetadata.getLocation().getDescription()).type(nodeMetadata.getType().name())
                         .status(nodeMetadata.getStatus().name())
-                                // .keyName(nodeMetadata.getType())
+                        .name(nodeMetadata.getName())
                                 // .uptime(new Date().getTime() -
                                 // computeServiceContext.getComputeService().getTime())
                                 // .tags(nodeMetadata.getTags())
@@ -52,7 +61,7 @@ class Interoute extends Provider {
         return instances;    }
 
     @Override
-    public List<Instance> destroyInstances(String prefix) {
+    public void destroyNodes(String prefix) {
         List<Instance> instances = Lists.newArrayList();
         ComputeServiceContext computeServiceContext = ContextBuilder.newBuilder("abiquo")
                 .endpoint("http://vdcbridge.interoute.com/jclouds/api/")
@@ -64,10 +73,11 @@ class Interoute extends Provider {
                     .listVirtualAppliances()) {
                 if (virtualAppliance.getName().startsWith(prefix) && virtualAppliance.getState() ==
                         VirtualApplianceState.NOT_DEPLOYED) {
-                    instances.add(Instance.builder().id(virtualAppliance.getId().toString()).provider(name)
+                    instances.add(Instance.builder().id(virtualAppliance.getId().toString()).provider("abiquo")
                             .region(virtualAppliance.getVirtualDatacenter().getName())
                             .status(virtualAppliance.getState().name())
                             .build());
+                    log.debug("Deleting {}", virtualAppliance.getName());
                     virtualAppliance.delete();
                 }
             }
@@ -76,22 +86,6 @@ class Interoute extends Provider {
         } finally {
             computeServiceContext.close();
         }
-        return instances;
-    }
-
-    private Predicate<? super NodeMetadata> groupStartsWith(final String groupPrefix) {
-        checkNotNull(emptyToNull(groupPrefix), "groupPrefix must be defined");
-        return new Predicate<NodeMetadata>() {
-            @Override
-            public boolean apply(NodeMetadata nodeMetadata) {
-                return nodeMetadata.getGroup().startsWith(groupPrefix);
-            }
-
-            @Override
-            public String toString() {
-                return "groupStartsWith(" + groupPrefix + ")";
-            }
-        };
     }
 
 }

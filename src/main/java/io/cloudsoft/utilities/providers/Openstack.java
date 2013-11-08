@@ -4,10 +4,16 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.inject.Module;
 import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
+import org.jclouds.Constants;
+import org.jclouds.ContextBuilder;
 import org.jclouds.collect.IterableWithMarker;
 import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
@@ -20,19 +26,34 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
-class Openstack extends Provider {
+import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 
-    private static final Logger log = LoggerFactory.getLogger(Ec2.class);
+public abstract class Openstack extends BasicProvider {
 
-    protected Openstack(String provider, String identity, String credential) {
-        super(provider, identity, credential);
+    private static final Logger log = LoggerFactory.getLogger(Openstack.class);
+
+    protected enum TAG_VALUE {
+        DELETABLE
+    }
+    protected static final String STATUS = "STATUS";
+
+
+    protected String identity;
+    protected String credential;
+
+    public Openstack(String identity, String credential) {
+        super(identity, credential);
+        this.identity = identity;
+        this.credential = credential;
     }
 
     @Override
     public List<Instance> listInstances() throws Exception {
         List<Instance> instances = Lists.newArrayList();
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(getName());
         try {
             RestContext<NovaApi, NovaAsyncApi> client = computeServiceContext.unwrap();
             for (String zone : client.getApi().getConfiguredZones()) {
@@ -41,7 +62,9 @@ class Openstack extends Provider {
 
                 for (Server server : servers) {
                     serverApiForZone.getMetadata(server.getId());
-                    instances.add(Instance.builder().id(server.getId()).provider(name).region(zone)
+                    instances.add(Instance.builder().id(server.getId())
+                            .name(server.getName())
+                            .provider(getName()).region(zone)
                             .type(server.getFlavor().getId()).status(server.getStatus().toString())
                             .keyName(server.getKeyName()).uptime(new Date().getTime() - server.getCreated().getTime())
                             .tags(serverApiForZone.getMetadata(server.getId())).build());
@@ -57,8 +80,7 @@ class Openstack extends Provider {
 
     @Override
     public void tagAndCleanInstances(String tag) throws Exception {
-        super.tagAndCleanInstances(tag);
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(getName());
         RestContext<NovaApi, NovaAsyncApi> client = computeServiceContext.unwrap();
         for (String zone : client.getApi().getConfiguredZones()) {
             ServerApi serverApiForZone = client.getApi().getServerApiForZone(zone);
@@ -74,5 +96,21 @@ class Openstack extends Provider {
                 }
             }
         }
+    }
+
+    /**
+     * Create a jclouds {@link org.jclouds.rest.RestContext} to access the Compute API.
+     */
+    protected ComputeServiceContext getComputeServiceContext(String provider) throws Exception {
+        Properties properties = new Properties();
+        long scriptTimeout = TimeUnit.MILLISECONDS.convert(20, TimeUnit.MINUTES);
+        properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
+        properties.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
+        ImmutableSet<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
+        ContextBuilder builder = ContextBuilder.newBuilder(provider)
+                .credentials(identity, credential)
+                .modules(modules)
+                .overrides(properties);
+        return builder.buildView(ComputeServiceContext.class);
     }
 }

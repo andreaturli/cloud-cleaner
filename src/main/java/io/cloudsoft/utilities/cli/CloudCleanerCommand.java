@@ -28,7 +28,7 @@ public class CloudCleanerCommand implements Runnable {
 
     public void printInstances(String provider, List<Instance> instances) {
         log.info("==================================================================================================");
-        log.info("  PROVIDER '{}'", provider);
+        log.info("  PROVIDER '{}' - {} instances running", provider, instances.size());
         log.info("==================================================================================================");
         for (Instance instance : instances) {
             log.info(instance.toString());

@@ -9,7 +9,8 @@ public class CloudCleaner {
         Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("cloud-cleaner")
                 .withDescription("Your cloud assistant")
                 .withDefaultCommand(Help.class)
-                .withCommands(Help.class, ListInstances.class, DestroyInstances.class);
+                .withCommands(Help.class, ListInstances.class, DestroyNetworks.class, DestroyNodes.class,
+                        CleanCloud.class);
         Cli<Runnable> gitParser = builder.build();
         gitParser.parse(args).run();
     }

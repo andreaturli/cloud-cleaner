@@ -12,25 +12,29 @@ import org.jclouds.softlayer.domain.VirtualGuest;
 import java.util.Date;
 import java.util.List;
 
-public class Softlayer extends Provider {
+public class Softlayer extends BasicProvider {
 
-    protected Softlayer(String identity, String credential) {
-        super(SOFTLAYER_PROVIDER, identity, credential);
+    public Softlayer(String identity, String credential) {
+        super(identity, credential);
+    }
+
+    @Override
+    public String getName() {
+        return SOFTLAYER_PROVIDER;
     }
 
     @Override
     public List<Instance> listInstances() throws Exception {
         List<Instance> instances = Lists.newArrayList();
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(getName());
         try {
             RestContext<SoftLayerClient, SoftLayerAsyncClient> client = computeServiceContext.unwrap();
             SoftLayerClient api = client.getApi();
             for (VirtualGuest virtualGuest : api.getVirtualGuestClient().listVirtualGuests()) {
-                instances.add(Instance.builder().id(virtualGuest.getUuid()).provider(name)
+                instances.add(Instance.builder().id(virtualGuest.getUuid()).provider(getName())
                         .region(virtualGuest.getDatacenter().getLongName()).type("Cloud Compute Instance")
                         .status(virtualGuest.getPowerState().toString()).keyName(virtualGuest.getAccountId() + "")
                         .uptime(new Date().getTime() - virtualGuest.getCreateDate().getTime())
-                                // .tags()
                         .build());
             }
         } catch (Exception e) {

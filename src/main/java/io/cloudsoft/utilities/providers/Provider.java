@@ -16,9 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 
-public abstract class Provider {
-
-    private static final Logger log = LoggerFactory.getLogger(Provider.class);
+public interface Provider {
 
     /**
      * AWS EC2.
@@ -53,7 +51,7 @@ public abstract class Provider {
      */
     public static final String INTEROUTE_PROVIDER = "interoute";
 
-    protected static final String STATUS = "STATUS";
+    /*
     protected static final String LAST_RUN = "LAST-RUN";
     protected enum TAG_VALUE {
         DELETABLE
@@ -62,44 +60,12 @@ public abstract class Provider {
     protected enum ACTION {
         LIST, TAG_AND_CLEANUP, DESTROY
     }
+    */
 
-    protected String name;
-    protected String identity;
-    protected String credential;
+    String getName();
+    List<Instance> listInstances() throws Exception;
+    void tagAndCleanInstances(String tag) throws Exception;
 
-    protected Provider(String name, String identity, String credential) {
-        this.name = name;
-        this.identity = identity;
-        this.credential = credential;
-    }
-
-    public List<Instance> listInstances() throws Exception {
-        log.debug("listInstances");
-        return null;
-    }
-
-    public void tagAndCleanInstances(String tag) throws Exception {
-        log.debug("tagAndCleanInstances with tag: " + tag);
-    }
-
-    public List<Instance> destroyInstances(String prefix) {
-        log.debug("destroyInstances with " + prefix);
-        return null;
-    }
-
-    /**
-     * Create a jclouds {@link org.jclouds.rest.RestContext} to access the Compute API.
-     */
-    protected ComputeServiceContext getComputeServiceContext(String provider) throws Exception {
-        Properties properties = new Properties();
-        long scriptTimeout = TimeUnit.MILLISECONDS.convert(20, TimeUnit.MINUTES);
-        properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
-        properties.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
-        ImmutableSet<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
-        ContextBuilder builder = ContextBuilder.newBuilder(provider)
-                .credentials(identity, credential)
-                .modules(modules)
-                .overrides(properties);
-        return builder.buildView(ComputeServiceContext.class);
-    }
+    void destroyNodes(String prefix) throws Exception;
+    void destroyNetworks(String project, String prefix) throws Exception;
 }

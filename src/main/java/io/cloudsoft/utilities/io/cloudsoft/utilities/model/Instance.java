@@ -10,18 +10,21 @@ import static com.google.common.base.Objects.equal;
 public class Instance {
 
     private String id;
+    private String name;
     private String provider;
     private String region;
     private String type;
     private String status;
     private String keyName;
+    private String groupName;
     private long uptime;
     private Map<String, String> tags;
 
-    public Instance(String id, String provider, String region, String type, String status, String keyName, long uptime,
-                    Map<String,
-                            String> tags) {
+    public Instance(String id, String name, String provider, String region, String type, String status,
+                    String keyName, long uptime,
+                    String groupName, Map<String,String> tags) {
         this.id = id;
+        this.name = name;
         this.provider = provider;
         this.region = region;
         this.keyName = keyName;
@@ -29,6 +32,7 @@ public class Instance {
         this.tags = tags;
         this.type = type;
         this.uptime = uptime;
+        this.groupName = groupName;
         this.tags = tags;
     }
 
@@ -38,6 +42,10 @@ public class Instance {
 
     public String getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getProvider() {
@@ -68,6 +76,10 @@ public class Instance {
         return uptime;
     }
 
+    public String getGroupName() {
+        return groupName;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
@@ -79,12 +91,14 @@ public class Instance {
         if (obj == null || getClass() != obj.getClass()) return false;
         Instance that = Instance.class.cast(obj);
         return equal(this.id, that.id) &&
+                equal(this.name, that.name) &&
                 equal(this.provider, that.provider) &&
                 equal(this.region, that.region) &&
                 equal(this.keyName, that.keyName) &&
                 equal(this.status, that.status) &&
                 equal(this.tags, that.tags) &&
                 equal(this.type, that.type) &&
+                equal(this.groupName, that.groupName) &&
                 equal(this.uptime, that.uptime);
     }
 
@@ -92,12 +106,14 @@ public class Instance {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("id", id)
+                .add("name", name)
                 .add("provider", provider)
                 .add("region", region)
                 .add("type", type)
                 .add("status", status)
                 .add("keyName", keyName)
                 .add("uptime", uptime)
+                .add("groupName", groupName)
                 .add("tags", tags)
                 .toString();
     }
@@ -109,16 +125,23 @@ public class Instance {
     public static final class Builder {
 
         private String id;
+        private String name;
         private String provider;
         private String region;
         private String type;
         private String status;
         private String keyName;
         private long uptime;
+        private String groupName;
         private Map<String, String> tags;
 
         public Builder id(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
             return this;
         }
 
@@ -152,6 +175,11 @@ public class Instance {
             return this;
         }
 
+        public Builder groupName(String groupName) {
+            this.groupName = groupName;
+            return this;
+        }
+
         public Builder tags(Map<String, String> tags) {
             if (this.tags == null)
                 this.tags = Maps.newHashMap();
@@ -164,18 +192,21 @@ public class Instance {
         }
 
         public Instance build() {
-            return new Instance(id, provider, region, type, status, keyName, uptime, tags);
+            return new Instance(id, name, provider, region, type, status, keyName, uptime, groupName, tags);
         }
 
         public Builder fromInstance(Instance in) {
             return id(in.getId())
+                    .name(in.getName())
                     .provider(in.getProvider())
                     .region(in.getRegion())
                     .type(in.getType())
                     .status(in.getStatus())
                     .keyName(in.getKeyName())
                     .uptime(in.getUptime())
+                    .groupName(in.getGroupName())
                     .tags(in.getTags());
         }
+
     }
 }

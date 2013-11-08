@@ -29,19 +29,23 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Predicates.and;
 
-class Ec2 extends Provider {
+class Ec2 extends BasicProvider {
 
     private static final Logger log = LoggerFactory.getLogger(Ec2.class);
 
-    protected Ec2(String provider, String identity, String credential) {
-        super(provider, identity, credential);
+    public Ec2(String identity, String credential) {
+        super(identity, credential);
+    }
+
+    @Override
+    public String getName() {
+        return AWS_PROVIDER;
     }
 
     @Override
     public List<Instance> listInstances() throws Exception {
-        super.listInstances();
         List<Instance> instances = Lists.newArrayList();
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(getName());
         try {
             RestContext<EC2Client, EC2AsyncClient> client = computeServiceContext.unwrap();
             for (String region : client.getApi().getConfiguredRegions()) {
@@ -57,10 +61,14 @@ class Ec2 extends Provider {
                                 tags.put(tag.getKey(), tag.getValue().orNull());
                             }
                         }
-                        instances.add(Instance.builder().id(instance.getId()).provider(name).region(region)
+                        instances.add(Instance.builder().id(instance.getId())
+                                .name(instance.getDnsName())
+                                .provider(getName()).region(region)
                                 .type(instance.getInstanceType()).status(instance.getInstanceState().value())
                                 .keyName(instance.getKeyName())
-                                .uptime(new Date().getTime() - instance.getLaunchTime().getTime()).tags(tags).build());
+                                .uptime(new Date().getTime() - instance.getLaunchTime().getTime())
+                                .tags(tags)
+                                .build());
                     }
             }
         } catch (Exception e) {
@@ -84,7 +92,7 @@ class Ec2 extends Provider {
     }
 
     private void applyTagToInstance(Instance instance, String tagValue, String region, long threshold) throws Exception {
-        ComputeServiceContext computeServiceContext = getComputeServiceContext(name);
+        ComputeServiceContext computeServiceContext = getComputeServiceContext(getName());
         if (TimeUnit.MILLISECONDS.toHours(instance.getUptime()) > threshold && instance.getStatus().equals
                 (InstanceState.RUNNING.value())) {
             RestContext<EC2Client, EC2AsyncClient> client = computeServiceContext.unwrap();
