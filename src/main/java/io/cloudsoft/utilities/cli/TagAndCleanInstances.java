@@ -15,9 +15,6 @@ public class TagAndCleanInstances extends CloudCleanerCommand {
 
     private static final Logger log = LoggerFactory.getLogger(TagAndCleanInstances.class);
 
-    @Arguments(description = "Cloud providers to be searched")
-    public List<String> providers;
-
     @Option(name = {"-t", "--tag"}, description = "Tag")
     public String tag = "";
 
@@ -34,7 +31,7 @@ public class TagAndCleanInstances extends CloudCleanerCommand {
     private void listInstances() throws Exception {
         log.info("List all instances of provider(s): {} and their tags", providers);
         for (String provider : providers) {
-            new ProviderFactory().createProvider(provider).tagAndCleanInstances(tag);
+            new ProviderFactory().getProviderInstance(provider).tagAndCleanInstances(tag);
         }
     }
 

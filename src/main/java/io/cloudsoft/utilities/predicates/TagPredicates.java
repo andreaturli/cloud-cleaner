@@ -5,11 +5,6 @@ import org.jclouds.ec2.domain.Tag;
 
 import static io.cloudsoft.utilities.CloudCleaner.STATUS;
 
-/**
- *
- * @author Andrea Turli
- * @version 0.1.0-SNAPSHOT
- */
 public class TagPredicates {
 
    public static Predicate isInstance() {

@@ -1,9 +1,19 @@
 package io.cloudsoft.utilities.providers;
 
+import org.jclouds.domain.Credentials;
+
+import java.util.Set;
+
 public class HpCloudCompute extends Openstack {
 
-    public HpCloudCompute(String identity, String credential) {
-        super(identity, credential);
+   private static final String HPCLOUD_PROVIDER = "hpcloud-compute";
+
+   public HpCloudCompute() {
+      super();
+   }
+
+   public HpCloudCompute(Set<Credentials> credentials) {
+       super(credentials);
     }
 
     @Override

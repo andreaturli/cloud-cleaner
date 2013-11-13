@@ -12,27 +12,24 @@ import java.util.List;
 @Command(name = "list", description = "List all instances running on the clouds")
 public class ListInstances extends CloudCleanerCommand {
 
-    private static final Logger log = LoggerFactory.getLogger(ListInstances.class);
+   private static final Logger log = LoggerFactory.getLogger(ListInstances.class);
 
-    @Arguments(description = "Cloud providers to be searched")
-    public List<String> providers;
+   @Override
+   public void run() {
+      super.run();
+      try {
+         listInstances();
+      } catch (Exception e) {
+         log.error("Cannot execute the list instances command.", e);
+         throw Throwables.propagate(e);
+      }
+   }
 
-    @Override
-    public void run() {
-        super.run();
-        try {
-            listInstances();
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    private void listInstances() throws Exception {
-        log.info("List all instances of provider(s): {} and their tags", providers);
-        for (String provider : providers) {
-                printInstances(provider, new ProviderFactory().createProvider(provider)
-                        .listInstances());
-        }
-    }
+   private void listInstances() throws Exception {
+      log.info("List all instances of provider(s): {} and their tags", providers);
+      for (String provider : providers) {
+         printInstances(provider, new ProviderFactory().getProviderInstance(provider).listInstances());
+      }
+   }
 
 }

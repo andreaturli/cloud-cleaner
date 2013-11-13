@@ -15,13 +15,10 @@ public class CleanCloud extends CloudCleanerCommand {
 
     private static final Logger log = LoggerFactory.getLogger(ListInstances.class);
 
-    @Arguments(description = "Cloud provider to be cleaned")
-    public String provider;
-
     @Option(name = {"-prj", "--project"}, description = "Name of the project", required = false)
     public String projectName = "";
 
-    @Option(name = {"-np", "--networkPrefix"}, description = "Network prefix", required = true)
+    @Option(name = {"-np", "--networkPrefix"}, description = "Network prefix", required = false)
     public String networkPrefix = "";
 
     @Option(name = {"-gp", "--groupPrefix"}, description = "Group prefix", required = true)
@@ -38,9 +35,11 @@ public class CleanCloud extends CloudCleanerCommand {
     }
 
     private void cleanUp() throws Exception {
-        log.info("Clean up cloud {}", provider);
-        new ProviderFactory().createProvider(provider).destroyNetworks(projectName, networkPrefix);
-        new ProviderFactory().createProvider(provider).destroyNodes(groupPrefix);
+       for (String provider : providers) {
+         log.info("Clean up cloud {}", provider);
+         new ProviderFactory().getProviderInstance(provider).deleteNetworks(projectName, networkPrefix);
+         new ProviderFactory().getProviderInstance(provider).deleteNodes(groupPrefix);
+       }
     }
 
 }

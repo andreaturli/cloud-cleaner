@@ -1,13 +1,23 @@
 package io.cloudsoft.utilities.providers;
 
+import org.jclouds.domain.Credentials;
+
+import java.util.Set;
+
 public class RackspaceCloudserversUK extends Openstack {
 
-    public RackspaceCloudserversUK(String identity, String credential) {
-        super(identity, credential);
-    }
+   private static final String RACKSPACE_UK_PROVIDER = "rackspace-cloudservers-uk";
 
-    @Override
-    public String getName() {
-        return RACKSPACE_UK_PROVIDER;
-    }
+   public RackspaceCloudserversUK() {
+      super();
+   }
+
+   public RackspaceCloudserversUK(Set<Credentials> credentials) {
+      super(credentials);
+   }
+
+   @Override
+   public String getName() {
+      return RACKSPACE_UK_PROVIDER;
+   }
 }

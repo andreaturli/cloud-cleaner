@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Objects.equal;
 
@@ -112,7 +113,7 @@ public class Instance {
                 .add("type", type)
                 .add("status", status)
                 .add("keyName", keyName)
-                .add("uptime", uptime)
+                .add("uptime", TimeUnit.HOURS.convert(uptime, TimeUnit.MILLISECONDS) + " hour(s)")
                 .add("groupName", groupName)
                 .add("tags", tags)
                 .toString();
