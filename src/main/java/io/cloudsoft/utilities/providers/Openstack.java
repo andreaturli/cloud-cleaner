@@ -28,10 +28,6 @@ public abstract class Openstack extends BasicProvider {
    protected static final String STATUS = "STATUS";
    private static final Logger log = LoggerFactory.getLogger(Openstack.class);
 
-   public Openstack() {
-      super();
-   }
-
    public Openstack(Set<Credentials> credentials) {
       super(credentials);
    }

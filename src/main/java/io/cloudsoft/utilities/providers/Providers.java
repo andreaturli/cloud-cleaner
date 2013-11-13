@@ -65,8 +65,8 @@ public class Providers {
          if (!Modifier.isAbstract(cls.getModifiers()) &&
                  (BasicProvider.class.isAssignableFrom(cls) ||
                          Openstack.class.isAssignableFrom(cls))) {
-            Constructor<?> constructor = cls.getConstructor();
-            Object obj = constructor.newInstance();
+            Constructor<?> constructor = cls.getConstructor(Set.class);
+            Object obj = constructor.newInstance(Sets.newHashSet());
             Class noparams[] = {};
             Method method = cls.getDeclaredMethod("getName", noparams);
             providerNames.add((String) method.invoke(obj, null));

@@ -32,13 +32,9 @@ public abstract class BasicProvider implements Provider {
    public static final String STATUS = "STATUS";
    public static final String LAST_RUN = "LAST-RUN";
 
-   public enum ACTION {
-        LIST, TAG_AND_CLEANUP, DESTROY
-    }
-
    protected Set<Credentials> credentials;
 
-   protected BasicProvider() {
+   public BasicProvider() {
    }
 
    public BasicProvider(Set<Credentials> credentials) {

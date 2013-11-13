@@ -18,10 +18,6 @@ public class IbmSmartCloudEnterprise extends BasicProvider {
    private static final Logger log = LoggerFactory.getLogger(IbmSmartCloudEnterprise.class);
    private static final String IBM_SCE_PROVIDER = "ibm-sce-compute";
 
-   public IbmSmartCloudEnterprise() {
-      super();
-   }
-
    public IbmSmartCloudEnterprise(Set<Credentials> credentials) {
       super(credentials);
    }

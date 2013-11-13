@@ -27,10 +27,6 @@ public class GoogleComputeEngine extends BasicProvider {
    private static final Logger log = LoggerFactory.getLogger(GoogleComputeEngine.class);
    private static final String GOOGLE_COMPUTE_ENGINE_PROVIDER = "google-compute-engine";
 
-   public GoogleComputeEngine() {
-      super();
-   }
-
    public GoogleComputeEngine(Set<Credentials> credentials) {
       super(credentials);
    }

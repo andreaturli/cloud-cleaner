@@ -35,10 +35,6 @@ class Ec2 extends BasicProvider {
    private static final Logger log = LoggerFactory.getLogger(Ec2.class);
    private static final String AWS_EC2 = "aws-ec2";
 
-   public Ec2() {
-      super();
-   }
-
    public Ec2(Set<Credentials> credentials) {
       super(credentials);
    }

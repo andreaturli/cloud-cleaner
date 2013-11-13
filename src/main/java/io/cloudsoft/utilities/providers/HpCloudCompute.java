@@ -8,10 +8,6 @@ public class HpCloudCompute extends Openstack {
 
    private static final String HPCLOUD_PROVIDER = "hpcloud-compute";
 
-   public HpCloudCompute() {
-      super();
-   }
-
    public HpCloudCompute(Set<Credentials> credentials) {
        super(credentials);
     }

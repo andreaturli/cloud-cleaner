@@ -18,10 +18,6 @@ public class Softlayer extends BasicProvider {
 
    private static final String SOFTLAYER_PROVIDER = "softlayer";
 
-   public Softlayer() {
-      super();
-   }
-
    public Softlayer(Set<Credentials> credentials) {
       super(credentials);
    }

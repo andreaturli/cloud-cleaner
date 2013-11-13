@@ -26,10 +26,6 @@ class Interoute extends BasicProvider {
    private static final Logger log = LoggerFactory.getLogger(Interoute.class);
    private static final String INTEROUTE_PROVIDER = "interoute";
 
-   public Interoute() {
-      super();
-   }
-
    public Interoute(Set<Credentials> credentials) {
       super(credentials);
    }
