@@ -7,8 +7,13 @@ The following cloud providers are supported:
     
     * AWS EC2 (aws-ec2)
     * Rackspace Cloud Server (Next Generation) UK (rackspace-cloudservers-uk)
+    * Rackspace Cloud Server (Next Generation) US (rackspace-cloudservers-us)
     * HpCloud Compute (hpcloud-compute)
     * Softlayer Cloudlayer (softlayer)
+    * Interoute (abiquo) 
+    * IBM Smart Cloud Enterprise 
+    * IBM SoftLayer,
+    * Google Compute Engine
 
 ## Building
 
@@ -16,55 +21,45 @@ Build the program using Maven:
 
     % mvn clean install
 
-This will create an executable Jar file named `cloudcleaner-0.1.0-SNAPSHOT-jar-with-dependencies.jar` containing the code and all its dependencies.
+This will create an executable Jar file named `cloudcleaner-0.2.0-SNAPSHOT-jar-with-dependencies.jar` containing the code and all its dependencies.
 
 ## Usage
 
 Use the program as follows, 
 
-    % java -Daws-ec2.identity=XXXXXXXX 
-    		-Daws-ec2.credential=XXXXXXXX 
-            -Drackspace-cloudservers-uk.identity=XXXXXXXX 
-            -Drackspace cloudservers-uk.credential=XXXXXXXX
-            -Dhpcloud-compute.identity=XXXXXXXX 
-            -Dhpcloud-compute.credential=XXXXXXXX
-            -Dsoftlayer.identity=XXXXXXXX 
-            -Dsoftlayer.credential=XXXXXXXX                        
-            -jar target/cloud-cleaner-jar-with-dependencies.jar LIST 
+    % java -jar target/cloud-cleaner-jar-with-dependencies.jar
 
-or, for example,
+to have the usage of the program:
 
-     % java -Daws-ec2.identity=XXXXXXXX 
-     	    -Daws-ec2.credential=XXXXXXXX
-     		-jar target/cloud-cleaner-jar-with-dependencies.jar LIST aws-ec2     
-     			
+    % usage: cloud-cleaner <command> [<args>]
+    
+    The most commonly used cloud-cleaner commands are:
+    	cleanup          Clean up the given cloud (nodes, firewalls, networks)
+    	deletenetworks   Destroy all networks in the clouds matching a given prefix
+    	deletenodes      Destroy all instances in the clouds matching a given prefix
+    	help             Display help information
+    	list             List all instances running on the clouds
 
-if you want to list only the instances on AWS EC2.
+	See 'cloud-cleaner help <command>' for more information on a specific command.
 
-This is an example of the output of the `LIST` command:
+## Examples
 
-    [INFO] List all nodes and their tags
-    [INFO] ==================================================================================================
-    [INFO]   PROVIDER 'softlayer'
-    [INFO] ==================================================================================================
-    [INFO] Instance{id=26558908-cdb5-0779-4217-78ba9a475509, provider=softlayer, region=Dallas 1, status=PowerState{keyName=Running}, uptime (in hours)=0, tags=null, type=Cloud Compute Instance, keyName=278918}
-    [INFO] Instance{id=ff814d9c-86ff-0376-cafc-adc57b14435e, provider=softlayer, region=Dallas 1, status=PowerState{keyName=Running}, uptime (in hours)=0, tags=null, type=Cloud Compute Instance, keyName=278918}
-    [INFO] Instance{id=d1b36b44-f4f1-11bb-55da-d315e4a69295, provider=softlayer, region=Dallas 1, status=PowerState{keyName=Running}, uptime (in hours)=0, tags=null, type=Cloud Compute Instance, keyName=278918}
-    [INFO] Instance{id=da064dea-3a93-c67d-3919-f82e35074641, provider=softlayer, region=Dallas 1, status=PowerState{keyName=Running}, uptime (in hours)=0, tags=null, type=Cloud Compute Instance, keyName=278918}
-    [INFO] Instance{id=1322ca82-db96-84fe-f33f-7e2749a13ac4, provider=softlayer, region=Dallas 1, status=PowerState{keyName=Running}, uptime (in hours)=0, tags=null, type=Cloud Compute Instance, keyName=278918}
-    [INFO] Instance{id=88b56e6f-c259-e341-64ec-395080acfc04, provider=softlayer, region=Dallas 1, status=PowerState{keyName=Running}, uptime (in hours)=0, tags=null, type=Cloud Compute Instance, keyName=278918}
-    [INFO] ==================================================================================================
-    [INFO]   PROVIDER 'aws-ec2'
-    [INFO] ==================================================================================================
-    [INFO] Instance{id=i-e64216ac, provider=aws-ec2, region=eu-west-1, status=running, uptime (in hours)=2557, tags={Name=Jenkins Brooklyn}, type=m1.xlarge, keyName=jenkins}
-    [INFO] Instance{id=i-0e83b344, provider=aws-ec2, region=eu-west-1, status=running, uptime (in hours)=2802, tags={Name=Jenkins Cloudsoft}, type=m1.large, keyName=jenkins}
-    [INFO] Instance{id=i-1e686853, provider=aws-ec2, region=eu-west-1, status=running, uptime (in hours)=582, tags={Name=brooklyn-mja3-alex-simple-wordpress-qxxr-mysql-odae-1e686853}, type=t1.micro, keyName=jclouds#brooklyn-mja3-alex-simple-wordpress-qxxr-mysql-odae#47}
-    [INFO] Instance{id=i-2e686863, provider=aws-ec2, region=eu-west-1, status=running, uptime (in hours)=582, tags={Name=brooklyn-loqo-alex-simple-qxxr-wordpress-httpd-xutq-2e686863}, type=t1.micro, keyName=jclouds#brooklyn-loqo-alex-simple-qxxr-wordpress-httpd-xutq#ee0}
-    [INFO] ==================================================================================================
-    [INFO]   PROVIDER 'rackspace-cloudservers-uk'
-    [INFO] ==================================================================================================
-    [INFO] ==================================================================================================
-    [INFO]   PROVIDER 'hpcloud-compute'
-    [INFO] ==================================================================================================
-    [INFO] Instance{id=2032715, provider=hpcloud-compute, region=az-1.region-a.geo-1, status=ACTIVE, uptime (in hours)=2, tags={tags=LONG-RUNNING}, type=100, keyName=jclouds-brooklyn-pifb-adk-opengam-nvte-opengamma-server-odeu-aba}
-`
+This is an example of the output of the `java -jar target/cloud-cleaner-jar-with-dependencies.jar list softlayer -s` command:
+
+    Cloud providers to be searched: [softlayer]
+    CloudCleaner will search the following providers: [softlayer]
+    Found credentials for provider(softlayer) - identity(andrea.turli), credential(xxxxxxxxxxxxxxxxxxxxxxxx)
+
+    List all instances of provider(s): [softlayer] and their tags
+
+    ================================================================================
+
+      PROVIDER 'softlayer' - 121 instances running
+
+    ==================================================================================================
+    Instance{id=3f05f077-5762-dd48-6bde-238c3da424fe, name=null, provider=softlayer, region=San Jose 1, type=Cloud Compute Instance, status=PowerState{keyName=Running}, keyName=278184, uptime=959 hour(s), groupName=null, tags=null}
+    Instance{id=ff0f77fb-474f-ee09-0cf1-2898d1e9b704, name=null, provider=softlayer, region=Dallas 5, type=Cloud Compute Instance, status=PowerState{keyName=Running}, keyName=278184, uptime=2203 hour(s), groupName=null, tags=null}
+    Instance{id=852ef0c8-78cd-1ea8-4f46-5a1728e3bbc7, name=null, provider=softlayer, region=Dallas 5, type=Cloud Compute Instance, status=PowerState{keyName=Running}, keyName=278184, uptime=879 hour(s), groupName=null, tags=null}
+    Instance{id=38a99e89-e3c1-1843-3854-d7d34a44fe4c, name=null, provider=softlayer, region=San Jose 1, type=Cloud Compute Instance, status=PowerState{keyName=Running}, keyName=278184, uptime=393 hour(s), groupName=null, tags=null}
+    Instance{id=90758e2e-cdfc-aecf-ac74-c67215d8c9c9, name=null, provider=softlayer, region=San Jose 1, type=Cloud Compute Instance, status=PowerState{keyName=Running}, keyName=278184, uptime=536 hour(s), groupName=null, tags=null}
+    ...
