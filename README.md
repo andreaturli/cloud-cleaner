@@ -9,10 +9,9 @@ The following cloud providers are supported:
     * Rackspace Cloud Server (Next Generation) UK (rackspace-cloudservers-uk)
     * Rackspace Cloud Server (Next Generation) US (rackspace-cloudservers-us)
     * HpCloud Compute (hpcloud-compute)
-    * Softlayer Cloudlayer (softlayer)
     * Interoute (abiquo) 
     * IBM Smart Cloud Enterprise 
-    * IBM SoftLayer,
+    * IBM SoftLayer
     * Google Compute Engine
 
 ## Building
