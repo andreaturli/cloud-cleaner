@@ -3,6 +3,7 @@ package io.cloudsoft.utilities.providers;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.Module;
 import io.cloudsoft.utilities.io.cloudsoft.utilities.model.Instance;
 import org.jclouds.Constants;
@@ -27,58 +28,58 @@ import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT
 
 public abstract class BasicProvider implements Provider {
 
-    private static final Logger log = LoggerFactory.getLogger(BasicProvider.class);
-
    public static final String STATUS = "STATUS";
    public static final String LAST_RUN = "LAST-RUN";
-
+   private static final Logger log = LoggerFactory.getLogger(BasicProvider.class);
    protected Set<Credentials> credentials;
 
    public BasicProvider() {
    }
 
    public BasicProvider(Set<Credentials> credentials) {
-        this.credentials = credentials;
-    }
+      this.credentials = credentials;
+   }
 
-    /**
-     * Create a jclouds {@link org.jclouds.rest.RestContext} to access the Compute API.
-     */
-    public ComputeServiceContext getComputeServiceContext(String provider, String identity, String credential) {
-        Properties properties = new Properties();
-        long scriptTimeout = TimeUnit.MILLISECONDS.convert(20, TimeUnit.MINUTES);
-        properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
-        properties.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
-        ImmutableSet<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
-        ContextBuilder builder = ContextBuilder.newBuilder(provider)
-                .credentials(identity, credential)
-                .modules(modules)
-                .overrides(properties);
-        return builder.buildView(ComputeServiceContext.class);
-    }
+   /**
+    * Create a jclouds {@link org.jclouds.rest.RestContext} to access the Compute API.
+    */
+   public ComputeServiceContext getComputeServiceContext(String provider, String identity, String credential) {
+      Properties properties = new Properties();
+      long scriptTimeout = TimeUnit.MILLISECONDS.convert(20, TimeUnit.MINUTES);
+      properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
+      properties.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
+      ImmutableSet<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
+      ContextBuilder builder = ContextBuilder.newBuilder(provider)
+              .credentials(identity, credential)
+              .modules(modules)
+              .overrides(properties);
+      return builder.buildView(ComputeServiceContext.class);
+   }
 
-    @Override
-    public List<Instance> listInstances() {
-        return null;
-    }
+   @Override
+   public List<Instance> listInstances() {
+      return null;
+   }
 
-    @Override
-    public void tagAndCleanInstances(String tag) throws Exception {
-        log.debug("No-op");
-    }
+   @Override
+   public void tagAndCleanInstances(String tag) throws Exception {
+      log.debug("No-op");
+   }
 
    @Override
    public void deleteNodes(final String prefix) throws Exception {
       for (Credentials creds : credentials) {
          ComputeServiceContext computeServiceContext = getComputeServiceContext(getName(), creds.identity, creds.credential);
          try {
-            for (NodeMetadata nodeMetadata : computeServiceContext.getComputeService().listNodesDetailsMatching(
+            Set<? extends NodeMetadata> nodesMatching = computeServiceContext.getComputeService().listNodesDetailsMatching(
                     new Predicate<ComputeMetadata>() {
                        @Override
                        public boolean apply(@Nullable ComputeMetadata input) {
                           return input.getName().startsWith(prefix);
                        }
-                    })) {
+                    });
+            log.debug("Found the following nodes {} matching the prefix({})", Iterables.toString(nodesMatching), prefix);
+            for (NodeMetadata nodeMetadata : nodesMatching) {
                log.info("Deleting {} ...", nodeMetadata.getName());
                computeServiceContext.getComputeService().destroyNode(nodeMetadata.getId());
                log.info("Deleted {}!", nodeMetadata.getName());
@@ -91,28 +92,28 @@ public abstract class BasicProvider implements Provider {
       }
    }
 
-    @Override
-    public void deleteNetworks(String projectName, String prefix) throws Exception {
-        log.debug("No-op");
-    }
+   @Override
+   public void deleteNetworks(String projectName, String prefix) throws Exception {
+      log.debug("No-op");
+   }
 
-    @Override
-    public void deleteFirewalls(String projectName, String prefix) throws Exception {
-        log.debug("No-op");
-    }
+   @Override
+   public void deleteFirewalls(String projectName, String prefix) throws Exception {
+      log.debug("No-op");
+   }
 
-    protected Predicate<NodeMetadata> groupStartsWith(final String groupPrefix) {
-        checkNotNull(emptyToNull(groupPrefix), "groupPrefix must be defined");
-        return new Predicate<NodeMetadata>() {
-            @Override
-            public boolean apply(NodeMetadata nodeMetadata) {
-                return nodeMetadata.getGroup().startsWith(groupPrefix);
-            }
+   protected Predicate<NodeMetadata> groupStartsWith(final String groupPrefix) {
+      checkNotNull(emptyToNull(groupPrefix), "groupPrefix must be defined");
+      return new Predicate<NodeMetadata>() {
+         @Override
+         public boolean apply(NodeMetadata nodeMetadata) {
+            return nodeMetadata.getGroup().startsWith(groupPrefix);
+         }
 
-            @Override
-            public String toString() {
-                return "groupStartsWith(" + groupPrefix + ")";
-            }
-        };
-    }
+         @Override
+         public String toString() {
+            return "groupStartsWith(" + groupPrefix + ")";
+         }
+      };
+   }
 }

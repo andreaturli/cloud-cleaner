@@ -36,7 +36,7 @@ public class CleanCloud extends CloudCleanerCommand {
 
     private void cleanUp() throws Exception {
        for (String provider : providers) {
-         log.info("Clean up cloud {}", provider);
+         log.info("Clean up cloud({}) with groupPrefix({})", provider, groupPrefix);
          new ProviderFactory().getProviderInstance(provider).deleteNetworks(projectName, networkPrefix);
          new ProviderFactory().getProviderInstance(provider).deleteNodes(groupPrefix);
        }

@@ -9,11 +9,12 @@ public class HpCloudCompute extends Openstack {
    private static final String HPCLOUD_PROVIDER = "hpcloud-compute";
 
    public HpCloudCompute(Set<Credentials> credentials) {
-       super(credentials);
-    }
+      super(credentials);
+   }
 
-    @Override
-    public String getName() {
-        return HPCLOUD_PROVIDER;
-    }
+   @Override
+   public String getName() {
+      return HPCLOUD_PROVIDER;
+   }
+
 }

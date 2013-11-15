@@ -24,7 +24,7 @@ import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 class Interoute extends BasicProvider {
 
    private static final Logger log = LoggerFactory.getLogger(Interoute.class);
-   private static final String INTEROUTE_PROVIDER = "interoute";
+   private static final String INTEROUTE_PROVIDER = "abiquo";
 
    public Interoute(Set<Credentials> credentials) {
       super(credentials);
