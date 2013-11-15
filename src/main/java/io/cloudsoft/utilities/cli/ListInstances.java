@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-@Command(name = "list", description = "List all instances running on the clouds")
+@Command(name = "listinstances", description = "List all instances running on the clouds")
 public class ListInstances extends CloudCleanerCommand {
 
    private static final Logger log = LoggerFactory.getLogger(ListInstances.class);
