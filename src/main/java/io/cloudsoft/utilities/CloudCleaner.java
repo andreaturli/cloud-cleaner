@@ -20,14 +20,11 @@ import io.cloudsoft.utilities.predicates.TagPredicates;
 import org.jclouds.ContextBuilder;
 import org.jclouds.abiquo.AbiquoContext;
 import org.jclouds.abiquo.domain.cloud.VirtualAppliance;
-import org.jclouds.aws.ec2.AWSEC2Client;
-import org.jclouds.aws.ec2.services.AWSInstanceClient;
 import org.jclouds.collect.IterableWithMarker;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.ec2.EC2AsyncClient;
-import org.jclouds.ec2.EC2Client;
+import org.jclouds.ec2.EC2Api;
 import org.jclouds.ec2.domain.InstanceState;
 import org.jclouds.ec2.domain.Reservation;
 import org.jclouds.ec2.domain.RunningInstance;
@@ -40,8 +37,7 @@ import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.openstack.v2_0.domain.Resource;
 import org.jclouds.rest.RestContext;
-import org.jclouds.softlayer.SoftLayerAsyncClient;
-import org.jclouds.softlayer.SoftLayerClient;
+import org.jclouds.softlayer.SoftLayerApi;
 import org.jclouds.softlayer.domain.VirtualGuest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +53,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Module;
-import com.ibm.cloud.api.rest.client.DeveloperCloud;
-import com.ibm.cloud.api.rest.client.DeveloperCloudClient;
 
 /**
  * Utility to detect long-running VMs, and to kill them
@@ -94,10 +88,6 @@ public class CloudCleaner {
      * Google Cloud Compute
      */
     private static final String GOOGLE_COMPUTE_ENGINE_PROVIDER = "google-compute-engine";
-    /**
-     * IBM Smart Cloud Enterprise.
-     */
-    private static final String IBM_SCE_PROVIDER = "ibm-sce-compute";
     /**
      * Interoute.
      */
@@ -264,10 +254,6 @@ public class CloudCleaner {
                 List<Instance> googleComputeInstances = listGoogleComputeEngineInstances();
                 instances.addAll(googleComputeInstances);
                 printInstances(provider, googleComputeInstances);
-            } else if (provider.equals(IBM_SCE_PROVIDER)) {
-                List<Instance> ibmSceInstances = listIbmSceInstances();
-                instances.addAll(ibmSceInstances);
-                printInstances(provider, ibmSceInstances);
             } else if (provider.equals(INTEROUTE_PROVIDER)) {
                 List<Instance> interouteInstances = listInterouteInstances();
                 instances.addAll(interouteInstances);
@@ -305,26 +291,6 @@ public class CloudCleaner {
         return instances;
     }
 
-    private List<Instance> listIbmSceInstances() {
-        List<Instance> instances = Lists.newArrayList();
-        DeveloperCloudClient client = DeveloperCloud.getClient();
-        client.setRemoteCredentials(credentials.get(IBM_SCE_PROVIDER).get(0), credentials.get(IBM_SCE_PROVIDER).get(1));
-        try {
-            for (com.ibm.cloud.api.rest.client.bean.Instance instance : client.describeInstances()) {
-                instances.add(Instance.builder().id(instance.getID()).provider(IBM_SCE_PROVIDER)
-                        .region(instance.getLocation()).type(instance.getInstanceType())
-                        .status(instance.getStatus().toString())
-                        .keyName(instance.getKeyName())
-                        .uptime(new Date().getTime() - instance.getLaunchTime().getTime())
-                                // .tags(nodeMetadata.getTags())
-                        .build());
-            }
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        }
-        return instances;
-    }
-
     private List<Instance> listGoogleComputeEngineInstances() {
         List<Instance> instances = Lists.newArrayList();
         try {
@@ -352,9 +318,9 @@ public class CloudCleaner {
         List<Instance> instances = Lists.newArrayList();
         try {
             computeServiceContext = getComputeServiceContext(SOFTLAYER_PROVIDER);
-            RestContext<SoftLayerClient, SoftLayerAsyncClient> client = computeServiceContext.unwrap();
-            SoftLayerClient api = client.getApi();
-            for (VirtualGuest virtualGuest : api.getVirtualGuestClient().listVirtualGuests()) {
+            SoftLayerApi api = computeServiceContext.unwrapApi(SoftLayerApi
+                    .class);
+            for (VirtualGuest virtualGuest : api.getVirtualGuestApi().listVirtualGuests()) {
                 instances.add(Instance.builder().id(virtualGuest.getUuid()).provider(SOFTLAYER_PROVIDER)
                         .region(virtualGuest.getDatacenter().getLongName()).type("Cloud Compute Instance")
                         .status(virtualGuest.getPowerState().toString()).keyName(virtualGuest.getAccountId() + "")
@@ -402,14 +368,14 @@ public class CloudCleaner {
         List<Instance> instances = Lists.newArrayList();
         try {
             computeServiceContext = getComputeServiceContext(AWS_PROVIDER);
-            RestContext<EC2Client, EC2AsyncClient> client = computeServiceContext.unwrap();
-            for (String region : client.getApi().getConfiguredRegions()) {
-                TagApi tagApi = client.getApi().getTagApiForRegion(region).get();
-                Set<? extends Reservation<? extends RunningInstance>> reservations = getReservations(client, region);
+            EC2Api api = computeServiceContext.unwrapApi(EC2Api.class);
+            for (String region : api.getConfiguredRegions()) {
+                TagApi tagApi = api.getTagApiForRegion(region).get();
+                Set<? extends Reservation<? extends RunningInstance>> reservations = getReservations(api, region);
                 for (Reservation reservation : reservations) {
                     for (Object aReservation : reservation) {
                         RunningInstance instance = (RunningInstance) aReservation;
-                        ImmutableList<Tag> filteredTags = tagApi.list().filter(predicate).toImmutableList();
+                        ImmutableList<Tag> filteredTags = tagApi.list().filter(predicate).toList();
                         Map<String, String> tags = Maps.newHashMap();
                         for (Tag tag : filteredTags) {
                             if (tag.getResourceId().equals(instance.getId())) {
@@ -477,30 +443,29 @@ public class CloudCleaner {
     private void applyTagToInstance(Instance instance, String tagValue, String region, long threshold) {
         if (TimeUnit.MILLISECONDS.toHours(instance.getUptime()) > threshold && instance.getStatus().equals
                 (InstanceState.RUNNING.value())) {
-            RestContext<EC2Client, EC2AsyncClient> client = computeServiceContext.unwrap();
-            TagApi tagApi = client.getApi().getTagApiForRegion(region).get();
+            EC2Api api = computeServiceContext.unwrapApi(EC2Api.class);
+            TagApi tagApi = api.getTagApiForRegion(region).get();
             if (tagApi != null) {
                 ImmutableMap<String, String> tags = ImmutableMap.of(STATUS, tagValue, LAST_RUN, new Date().toString());
                 tagApi.applyToResources(tags, ImmutableList.of(instance.getId()));
                 LOG.info(Instance.builder().fromInstance(instance).tags(tags).build().toString() + " has been tagged " +
-                        "with: " + tagApi.list().filter(TagPredicates.hasId(instance.getId())).toImmutableList());
+                        "with: " + tagApi.list().filter(TagPredicates.hasId(instance.getId())).toList());
                 tagApi.deleteFromResources(ImmutableList.of(STATUS, LAST_RUN), ImmutableList.of(instance.getId()));
                 LOG.info("Tags " + STATUS + ", " + LAST_RUN + " related to CloudCleaner have been removed");
             }
         }
     }
 
-    private Set<? extends Reservation<? extends RunningInstance>> getReservations(RestContext<EC2Client, EC2AsyncClient> client, String region) {
-        AWSInstanceClient instanceClient = AWSEC2Client.class.cast(client.getApi()).getInstanceServices();
-        return instanceClient.describeInstancesInRegion(region);
+    private Set<? extends Reservation<? extends RunningInstance>> getReservations(EC2Api api, String region) {
+       return api.getInstanceApiForRegion(region).get().describeInstancesInRegion(region);
     }
 
     private void cleanUpRackspace() throws Exception {
-        RestContext<NovaApi, NovaAsyncApi> client = computeServiceContext.unwrap();
-        for (String zone : client.getApi().getConfiguredZones()) {
-            ServerApi serverApiForZone = client.getApi().getServerApiForZone(zone);
+        NovaApi api = computeServiceContext.unwrapApi(NovaApi.class);
+        for (String zone : api.getConfiguredZones()) {
+            ServerApi serverApiForZone = api.getServerApiForZone(zone);
             ImmutableList<? extends IterableWithMarker<? extends Resource>> iterableWithMarkers =
-                    serverApiForZone.list().toImmutableList();
+                    serverApiForZone.list().toList();
 
             for (IterableWithMarker<? extends Resource> iterableWithMarker : iterableWithMarkers) {
                 String instanceId = iterableWithMarker.get(0).getId();
