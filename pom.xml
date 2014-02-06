@@ -15,6 +15,17 @@
     </properties>
 
     <repositories>
+        <!-- enable sonatype snapshots repo (only for snapshots) -->
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases> <enabled>false</enabled> </releases>
+            <snapshots> <enabled>true</enabled> </snapshots>
+        </repository>
+    </repositories>
+
+    <repositories>
         <repository>
             <id>cloudsoft-maven-releases</id>
             <url>http://developers.cloudsoftcorp.com/maven/releases</url>
