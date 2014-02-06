@@ -3,7 +3,7 @@
 
     <groupId>io.cloudsoft.utilities</groupId>
     <artifactId>cloud-cleaner</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Utility to detect long-running VMs, and to kill them</name>
@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <brooklyn.version>0.6.0-SNAPSHOT</brooklyn.version>
+        <brooklyn.version>0.7.0-SNAPSHOT</brooklyn.version>
     </properties>
 
     <repositories>

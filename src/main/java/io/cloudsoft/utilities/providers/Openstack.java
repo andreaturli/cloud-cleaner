@@ -70,7 +70,7 @@ public abstract class Openstack extends BasicProvider {
          for (String zone : client.getApi().getConfiguredZones()) {
             ServerApi serverApiForZone = client.getApi().getServerApiForZone(zone);
             ImmutableList<? extends IterableWithMarker<? extends Resource>> iterableWithMarkers =
-                    serverApiForZone.list().toImmutableList();
+                    serverApiForZone.list().toList();
 
             for (IterableWithMarker<? extends Resource> iterableWithMarker : iterableWithMarkers) {
                String instanceId = iterableWithMarker.get(0).getId();

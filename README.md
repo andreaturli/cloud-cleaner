@@ -1,6 +1,8 @@
 Cloud Cleaner
 ===========
 
+https://www.codeship.io/projects/8e5bcdc0-714d-0131-8754-6a4a3becf96a/status
+
 Utility to clean up long running instances on a number of different cloud providers.
 
 The following cloud providers are supported:
