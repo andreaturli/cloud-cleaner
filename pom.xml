@@ -23,9 +23,6 @@
             <releases> <enabled>false</enabled> </releases>
             <snapshots> <enabled>true</enabled> </snapshots>
         </repository>
-    </repositories>
-
-    <repositories>
         <repository>
             <id>cloudsoft-maven-releases</id>
             <url>http://developers.cloudsoftcorp.com/maven/releases</url>
