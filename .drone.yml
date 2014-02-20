@@ -1,4 +1,4 @@
 image: openjdk7
 script:
-  - mvn install -q -DskipTests=true
-  - mvn test
+   - mvn install -q -DskipTests=true
+   - mvn test
